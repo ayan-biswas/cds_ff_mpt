@@ -61,6 +61,8 @@ pcDefinePCell(
                                               "R0" 0.1:0 "R90" 1
                                               list(list("w" "float" cdfParseFloatString(w))
                                                    list("l" "float" cdfParseFloatString(l))
+                                                   list("effw" "float" cdfParseFloatString(w))
+                                                   list("effl" "float" cdfParseFloatString(l))
                                                   )
                                             )
 
