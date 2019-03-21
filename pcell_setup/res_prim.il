@@ -34,15 +34,15 @@ pcDefinePCell(
      (layer string "5")
     )
     let((inst iopin_master io_net io_pin cdf_layer cdf_layer_name)
-        ; layer_index   |   layer_name  | gds / metalres number
-        ;   1                   M1
-        ;   2                   M2
-        ;   3                   M3
-        ;   4                   M4
-        ;   5                   M5
-        ;   6                   M6
-        ;   7                   M7
-        ;   8                   MT
+        ; layer_index   |   layer_name  | sheet resistance
+        ;   1                   M1          73.6m
+        ;   2                   M2          60.4m
+        ;   3                   M3          60.4m
+        ;   4                   M4          60.4m
+        ;   5                   M5          60.4m
+        ;   6                   M6          60.4m
+        ;   7                   M7          60.4m
+        ;   8                   MT          21.4m
 
         res_name = case( layer
             ("1" "resm1")
@@ -56,6 +56,18 @@ pcDefinePCell(
             (t (error "BAG_prim res_metal: Unrecognized layer number"))
         )
 
+        res_sheet = case( layer
+            ("1" 0.0736)
+            ("2" 0.0604)
+            ("3" 0.0604)
+            ("4" 0.0604)
+            ("5" 0.0604)
+            ("6" 0.0604)
+            ("7" 0.0604)
+            ("8" 0.0214)
+            (t (error "BAG_prim res_metal: Unrecognized layer number"))
+        )
+
 
         inst = dbCreateParamInstByMasterName( pcCellView "cds_ff_mpt" res_name "symbol"
                                               "R0" 0.1:0 "R90" 1
@@ -63,6 +75,7 @@ pcDefinePCell(
                                                    list("l" "float" cdfParseFloatString(l))
                                                    list("effw" "float" cdfParseFloatString(w))
                                                    list("effl" "float" cdfParseFloatString(l))
+                                                   list("r" "float" res_sheet*cdfParseFloatString(l)/cdfParseFloatString(w))
                                                   )
                                             )
 
