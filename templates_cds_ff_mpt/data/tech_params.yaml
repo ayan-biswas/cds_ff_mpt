@@ -7,6 +7,11 @@ resolution: 0.001
 # True if BAG needs to handle coloring metals.
 use_flip_parity: False
 
+well_layers:
+  ptap: []
+  ntap:
+    - !!python/tuple ['NWell', 'drawing']
+
 # mapping from transistor layer name to actual layer/purpose tuple
 mos_layer_table:
   # poly
@@ -54,13 +59,21 @@ res_layer_table:
 # a metal resistor.
 res_metal_layer_table:
   1:
-    - !!python/tuple ['RMDMY', 'drawing1']
+    - !!python/tuple ['m1res', 'drawing']
   2:
-    - !!python/tuple ['RMDMY', 'drawing2']
+    - !!python/tuple ['m2res', 'drawing']
   3:
-    - !!python/tuple ['RMDMY', 'drawing3']
+    - !!python/tuple ['m3res', 'drawing']
   4:
-    - !!python/tuple ['RMDMY', 'drawing4']
+    - !!python/tuple ['m4res', 'drawing']
+  5:
+    - !!python/tuple ['m5res', 'drawing']
+  6:
+    - !!python/tuple ['m6res', 'drawing']
+  7:
+    - !!python/tuple ['m7res', 'drawing']
+  8:
+    - !!python/tuple ['mtres', 'drawing']
 
 # mapping from metal layer ID to layer/purpose pair that
 # defines metal exclusion region.
@@ -281,6 +294,8 @@ mos:
   # calculated as val[0] + val[1] * fin_h + val[2] * fin_p
   # defaults to (0, 0, 0)
   od_fin_exty_constants: !!python/tuple [0, 0, 0]
+  # horizontal enclosure of fins over OD
+  od_fin_extx: 216
   # OD quantization pitch.
   mos_pitch: 48
   # number of fingers in an AnalogBase row must be multiples of this number.
