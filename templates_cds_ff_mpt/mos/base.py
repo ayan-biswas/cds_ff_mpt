@@ -480,9 +480,12 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                     raise ValueError('cannot connect 1 finger transistor')
                 if fg <= 5:
                     gate_fg_list = [fg]
-                else:
+                elif (fg - 3) % 4 == 0:
                     num_mp_half = (fg - 3) // 2
-                    gate_fg_list = list(chain(repeat(2, num_mp_half), [3], repeat(2, num_mp_half)))
+                    gate_fg_list = list(chain(repeat(2, num_mp_half // 2), [3], repeat(2, num_mp_half // 2)))
+                else:
+                    num_mp_half = (fg - 5) // 2
+                    gate_fg_list = list(chain(repeat(2, num_mp_half // 2), [5], repeat(2, num_mp_half // 2)))
 
             # connect gate to M1.
             tot_fg = 0
@@ -534,6 +537,93 @@ class MOSTechCDSFFMPT(MOSTechFinfetBase):
                     conn_warrs.append(WireArray(TrackID(mos_layer, tidx), cur_yb * res, cur_yt * res, res))
 
         return conn_warrs
+
+    def draw_substrate_connection(self,  # type: MOSTechFinfetBase
+                                  template,  # type: TemplateBase
+                                  layout_info,  # type: Dict[str, Any]
+                                  port_tracks,  # type: List[Union[float, int]]
+                                  dum_tracks,  # type: List[Union[float, int]]
+                                  exc_tracks,  # type: List[Union[float, int]]
+                                  dummy_only,  # type: bool
+                                  is_laygo,  # type: bool
+                                  is_guardring,  # type: bool
+                                  options,  # type: Dict[str, Any]
+                                  ):
+        # type: (...) -> bool
+
+        sub_parity = options.get('sub_parity', 0)
+
+        lch_unit = layout_info['lch_unit']
+        row_info_list = layout_info['row_info_list']
+
+        mos_constants = self.get_mos_tech_constants(lch_unit)
+        sd_pitch = mos_constants['sd_pitch']
+
+        sd_pitch2 = sd_pitch // 2
+
+        exc_set = set(int(2 * v + 1) for v in exc_tracks)
+
+        has_od = False
+        for row_info in row_info_list:
+            od_y = row_info.od_y
+            md_y = row_info.md_y
+            if od_y[1] > od_y[0]:
+                has_od = True
+
+                # find current port name
+                od_start, od_stop = row_info.od_x_list[0]
+                fg = od_stop - od_start
+                xshift = od_start * sd_pitch
+                sub_type = row_info.od_type[1]
+                port_name = 'VDD' if sub_type == 'ntap' else 'VSS'
+
+                # find X locations of M1/M3.
+                if dummy_only:
+                    # find X locations to draw vias
+                    dum_x_list = [sd_pitch2 * int(2 * v + 1) for v in dum_tracks]
+                    conn_x_list = []
+                else:
+                    # first, figure out port/dummy tracks
+                    # To lower parasitics, we try to draw only as many dummy tracks as necessary.
+                    # Also, every port track is also a dummy track (because some technology
+                    # there's no horizontal short).  With these constraints, our track selection
+                    # algorithm is as follows:
+                    # 1. for every dummy track, if its not adjacent to any port tracks, add it to
+                    #    port tracks (this improves dummy connection resistance to supply).
+                    # 2. Try to add as many unused tracks to port tracks as possible, while making
+                    #    sure we don't end up with adjacent port tracks.  This improves substrate
+                    #    connection resistance to supply.
+
+                    # use half track indices so we won't have rounding errors.
+                    dum_htr_set = set((int(2 * v + 1) for v in dum_tracks))
+                    conn_htr_set = set((int(2 * v + 1) for v in port_tracks))
+                    # add as many dummy tracks as possible to port tracks
+                    for d in dum_htr_set:
+                        if d + 2 not in conn_htr_set and d - 2 not in conn_htr_set:
+                            conn_htr_set.add(d)
+                    # add as many unused tracks as possible to port tracks
+                    for htr in range(od_start * 2, 2 * od_stop + 1, 2):
+                        if htr + 2 not in conn_htr_set and htr - 2 not in conn_htr_set:
+                            conn_htr_set.add(htr)
+                    # add all port sets to dummy set
+                    dum_htr_set.update(conn_htr_set)
+                    # find X coordinates
+                    dum_x_list = [sd_pitch2 * v for v in sorted(dum_htr_set)]
+                    conn_x_list = [sd_pitch2 * v for v in sorted(conn_htr_set)]
+
+                ds_code = 4 if is_guardring else 3
+                dum_warrs, port_warrs = self.draw_ds_connection(template, lch_unit, fg, sd_pitch,
+                                                                xshift, od_y, md_y,
+                                                                dum_x_list, conn_x_list, True, 1,
+                                                                ds_code,
+                                                                ud_parity=sub_parity)
+                template.add_pin(port_name, dum_warrs, show=False)
+                template.add_pin(port_name, port_warrs, show=False)
+
+                if not is_guardring:
+                    self.draw_g_connection(template, lch_unit, fg, sd_pitch, xshift, od_y, md_y,
+                                           conn_x_list, is_sub=True)
+        return has_od
 
     def draw_dum_connection_helper(self,
                                    template,  # type: TemplateBase
