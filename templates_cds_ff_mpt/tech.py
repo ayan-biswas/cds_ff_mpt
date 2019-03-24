@@ -87,6 +87,10 @@ class TechInfoCDSFFMPT(TechInfoConfig):
                 idc = 0.4 * factor
             # else:
             #     raise ValueError('yayUnsupported via type %s' % via_type)
+        elif vname == '4x':
+                idc = 0.4 * factor
+        elif vname == 't':
+                idc = 0.4 * factor
         else:
             raise ValueError('Unsupported via name %s and bm_type %s' % (vname, bm_type))
 

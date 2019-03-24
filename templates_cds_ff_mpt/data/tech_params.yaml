@@ -89,6 +89,8 @@ layer_name:
   4: M4
   5: M5
   6: M6
+  7: M7
+  8: MT
 
 # mapping from metal layer name to metal layer type.  The layer type
 # is used to figure out which EM rules to use.
@@ -101,6 +103,8 @@ layer_type:
   M4: '4'
   M5: 2x
   M6: 2x
+  M7: 4x
+  MT: 't'
 
 # mapping from via bottom layer ID to via name.  Via name is used
 # to figure out enclosure rules.
@@ -111,6 +115,8 @@ via_name:
   3: '4'
   4: 2x
   5: 2x
+  6: 4x
+  7: 't'
 
 # mapping from tuple of via layers to via ID.
 via_id:
@@ -121,6 +127,8 @@ via_id:
   !!python/tuple ['M3', 'M4']: M4_M3
   !!python/tuple ['M4', 'M5']: M5_M4
   !!python/tuple ['M5', 'M6']: M6_M5
+  !!python/tuple ['M6', 'M7']: M7_M6
+  !!python/tuple ['M7', 'MT']: MT_M7
 
 # table of eletromigration temperature scale factor
 idc_em_scale:
@@ -206,19 +214,61 @@ via:
         w_list: [.inf]
         enc_list:
           - [[8, 8]]
-    hrect:
-      dim: [64, 32]
-      sp: [42, 42]
-      sp2: [!!python/tuple [42, 42]]
-      sp3: [!!python/tuple [42, 42]]
+#    hrect:
+#      dim: [64, 32]
+#      sp: [42, 42]
+#      sp2: [!!python/tuple [42, 42]]
+#      sp3: [!!python/tuple [42, 42]]
+#      bot_enc:
+#      top_enc:
+#        w_list: [49, 51, 105, .inf]
+#        enc_list:
+#          - [[20, 0]]
+#          - [[12, 9]]
+#          - [[10, 10]]
+#          - [[10, 0]]
+  4x:
+    square:
+      dim: [42, 42]
+      sp: [62, 62]
+      sp2: [!!python/tuple [62, 62]]
+      sp3: [!!python/tuple [78, 78]]
       bot_enc:
       top_enc:
-        w_list: [49, 51, 105, .inf]
+        w_list: [.inf]
         enc_list:
-          - [[20, 0]]
-          - [[12, 9]]
-          - [[10, 10]]
-          - [[10, 0]]
+          - [[8, 8]]
+
+#      dim: [69, 69]
+#      sp: [90, 90]
+#      sp2: !!null
+#      sp3: !!null
+#      bot_enc:
+#      top_enc:
+#        w_list: [.inf]
+#        enc_list:
+#          - [[15, 15]]
+  t:
+    square:
+      dim: [42, 42]
+      sp: [62, 62]
+      sp2: [!!python/tuple [62, 62]]
+      sp3: [!!python/tuple [78, 78]]
+      bot_enc:
+      top_enc:
+        w_list: [.inf]
+        enc_list:
+          - [[8, 8]]
+#    square:
+#      dim: [100, 100]
+#      sp: [120, 120]
+#      sp2: [!!python/tuple [160, 160]]
+#      sp3: !!null
+#      bot_enc:
+#      top_enc:
+#        w_list: [.inf]
+#        enc_list:
+#          - [[30, 30]]
 
 # minimum wire spacing rule.  Space is measured orthogonal to wire direction.
 sp_min:
@@ -231,6 +281,12 @@ sp_min:
   2x:
     w_list: [59, 89, .inf]
     sp_list: [68, 80, 100]
+  4x:
+    w_list: [499, 999, .inf]
+    sp_list: [90, 120, 400]
+  t:
+    w_list: [750, 1500, 2500, 3500, .inf]
+    sp_list: [200, 350, 550, 750, 1250]
 
 # minimum wire spacing rule for same color wires.
 sp_sc_min:
@@ -243,6 +299,12 @@ sp_sc_min:
   2x:
     w_list: [59, 89, .inf]
     sp_list: [68, 80, 100]
+  4x:
+    w_list: [499, 999, .inf]
+    sp_list: [90, 120, 400]
+  t:
+    w_list: [750, 1500, 2500, 3500, .inf]
+    sp_list: [200, 350, 550, 750, 1250]
 
 # minimum line-end spacing rule.  Space is measured parallel to wire direction.
 sp_le_min:
@@ -255,24 +317,39 @@ sp_le_min:
   2x:
     w_list: [.inf]
     sp_list: [74]
-
+  4x:
+    w_list: [.inf]
+    sp_list: [96]
+  t:
+    w_list: [.inf]
+    sp_list: [300]
 # minimum length/minimum area rules.
 len_min:
   1x:
     w_list: [.inf]
-    w_al_list: [[6176, 10]]
+    w_al_list: [[6176, 32]]
     md_list: [.inf]
-    md_al_list: [[6176, 10]]
+    md_al_list: [[6176, 32]]
   '4':
     w_list: [.inf]
-    w_al_list: [[6176, 10]]
+    w_al_list: [[6176, 32]]
     md_list: [.inf]
-    md_al_list: [[6176, 10]]
+    md_al_list: [[6176, 32]]
   2x:
     w_list: [.inf]
-    w_al_list: [[8200, 10]]
+    w_al_list: [[8200, 58]]
     md_list: [.inf]
-    md_al_list: [[8200, 10]]
+    md_al_list: [[8200, 58]]
+  4x:
+    w_list: [.inf]
+    w_al_list: [[10000, 69]]
+    md_list: [.inf]
+    md_al_list: [[10000, 69]]
+  t:
+    w_list: [.inf]
+    w_al_list: [[48400, 220]]
+    md_list: [.inf]
+    md_al_list: [[48400, 220]]
 
 # DNW margin rules.
 dnw_margins:
